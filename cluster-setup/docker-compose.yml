@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  roach1:
+    container_name: roach1
+    hostname: roach1
+    image: cockroachdb/cockroach:latest
+    command: start --cluster-name=demo-cluster --logtostderr=WARNING --log-file-verbosity=WARNING --insecure --join=roach1
+
+  roach2:
+    container_name: roach2
+    hostname: roach2
+    image: cockroachdb/cockroach:latest
+    command: start --cluster-name=demo-cluster --logtostderr=WARNING --log-file-verbosity=WARNING --insecure --join=roach1
+    depends_on:
+      - roach1
+  lb:
+    container_name: lb
+    hostname: lb
+    build: ./nginx
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    depends_on:
+      - roach1
+      - roach2
+  roach-init:
+    container_name: roach-init
+    hostname: roach-init
+    image: timveil/cockroachdb-remote-client:latest
+    environment:
+      - COCKROACH_HOST=roach1:26257
+      - COCKROACH_INSECURE=true
+      - COCKROACH_INIT=true
+      - DATABASE_NAME=test
+      - DATABASE_USER=test_user
+    depends_on:
+      - lb

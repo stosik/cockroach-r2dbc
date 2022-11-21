@@ -1,0 +1,11 @@
+server:
+  port: 8081
+database:
+  url: r2dbc:pool:postgresql://localhost:26257/test?sslmode=disable
+  username: root
+
+spring:
+  liquibase:
+    change-log: classpath:/db/changelog.sql
+    url: jdbc:postgresql://localhost:26257/test?sslmode=disable
+    user: root
